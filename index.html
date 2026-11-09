@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Love Animation - Perfect 3D Solid Heart</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="loveCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById("loveCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 1. Ngôi sao nhấp nháy nền
+        const stars = [];
+        const numStars = 300;
+
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 1.5 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02 + 0.01
+            });
+        }
+
+        // 2. Tạo KHỐI TRÁI TIM 3D DỰA TRÊN DẠNG HÌNH CHUẨN
+        const heartParticles = [];
+        const numParticles = 1500;
+
+        // Hàm kiểm tra điểm nằm trong trái tim chuẩn 2D
+        function inHeart(x, y) {
+            // Chuẩn hóa tọa độ về khoảng [-1.5, 1.5]
+            let nx = x / 80;
+            let ny = -y / 80;
+            let a = nx * nx + ny * ny - 1;
+            return (a * a * a - nx * nx * ny * ny * ny) <= 0;
+        }
+
+        // Tạo tập hợp hạt lấp kín thể tích khối trái tim 3D chuẩn
+        while (heartParticles.length < numParticles) {
+            let rx = (Math.random() - 0.5) * 260;
+            let ry = (Math.random() - 0.5) * 260;
+            
+            if (inHeart(rx, ry)) {
+                // Tính độ dày Z dựa trên vị trí X, Y để khối tròn căng mọng
+                let maxZ = Math.sqrt(Math.max(0, 1 - Math.pow(rx/130, 2) - Math.pow(ry/130, 2))) * 50;
+                let rz = (Math.random() - 0.5) * 2 * maxZ;
+
+               heartParticles.push({
+    x: rx * 0.85,
+    y: ry * 0.85,
+    z: rz,
+
+    ox: rx * 0.85,
+    oy: ry * 0.85,
+    oz: rz,
+
+    vx: 0,
+    vy: 0,
+    vz: 0
+});
+            }
+        }
+
+        let phase = 1;      // Phase 1: Trái tim 2D chạy ngang | Phase 2: Khối 3D xoay
+        let angleY = 0;     // Góc xoay 3D
+        let pulse = 0;      // Nhịp đập phập phồng
+        let x = -150;
+const mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    active: false
+};
+
+canvas.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    mouse.active = true;
+});
+
+canvas.addEventListener("mouseleave", () => {
+    mouse.active = false;
+});
+        function animate() {
+            const centerY = canvas.height / 2 - 20;
+
+            // Clear màn hình
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+if(mouse.active){
+
+    for(let i=0;i<4;i++){
+
+        ctx.save();
+
+        ctx.fillStyle="white";
+        ctx.globalAlpha=Math.random();
+
+        ctx.beginPath();
+
+        ctx.arc(
+            mouse.x + (Math.random()-0.5)*30,
+            mouse.y + (Math.random()-0.5)*30,
+            Math.random()*2+1,
+            0,
+            Math.PI*2
+        );
+
+        ctx.fill();
+        ctx.restore();
+    }
+}
+            // Vẽ sao nhấp nháy
+            stars.forEach(star => {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0.2) {
+                    star.speed = -star.speed;
+                }
+                ctx.save();
+                ctx.globalAlpha = star.alpha;
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Vẽ Mặt trăng khuyết
+            ctx.save();
+            let moonX = 120, moonY = 110, moonRadius = 40;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#FFFDD0";
+            ctx.fillStyle = "#FFFDD0";
+            ctx.beginPath();
+            ctx.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "black";
+            ctx.beginPath();
+            ctx.arc(moonX + 15, moonY - 10, moonRadius - 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // ================= PHASE 1: TRÁI TIM CHẠY NGANG =================
+            if (phase === 1) {
+                ctx.fillStyle = "pink";
+                ctx.font = "bold 35px Arial";
+                ctx.textAlign = "left";
+                ctx.fillText("", x, centerY - 20);
+
+                ctx.fillStyle = "red";
+                let heartX = x + 180;
+                let heartY = centerY;
+
+                ctx.beginPath();
+                ctx.moveTo(heartX + 40, heartY + 70);
+                ctx.bezierCurveTo(heartX + 40, heartY + 40, heartX - 10, heartY + 20, heartX - 10, heartY - 10);
+                ctx.bezierCurveTo(heartX - 10, heartY - 40, heartX + 20, heartY - 40, heartX + 40, heartY - 10);
+                ctx.bezierCurveTo(heartX + 60, heartY - 40, heartX + 90, heartY - 40, heartX + 90, heartY - 10);
+                ctx.bezierCurveTo(heartX + 90, heartY + 20, heartX + 40, heartY + 40, heartX + 40, heartY + 70);
+                ctx.closePath();
+                ctx.fill();
+
+                x += 4;
+                if (x > canvas.width + 100) {
+                    phase = 2;
+                }
+            } 
+            
+            // ================= PHASE 2: KHỐI TRÁI TIM 3D DẠNG CHUẨN ĐẸP =================
+            else if (phase === 2) {
+                const targetRotation =
+    ((mouse.x / canvas.width) - 0.5) * 1.2;
+
+angleY += (targetRotation - angleY) * 0.05; // Tốc độ xoay 3D
+                pulse += 0.04;  // Tốc độ phập phồng
+
+                let scale = (Math.sin(pulse) * 0.08 + 1) * 1.2; 
+                let cx = canvas.width / 2;
+                let cy = canvas.height / 2;
+
+                // Chiếu 3D và Sắp xếp Z-Index
+                heartParticles.forEach(p => {
+
+    if(mouse.active){
+
+        const dx = mouse.x - (canvas.width/2 + p.x);
+        const dy = mouse.y - (canvas.height/2 + p.y);
+
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if(dist < 180){
+
+            const force = (180 - dist)/180;
+
+            p.vx += dx * force * 0.003;
+            p.vy += dy * force * 0.003;
+        }
+    }
+
+    p.vx += (p.ox - p.x) * 0.02;
+    p.vy += (p.oy - p.y) * 0.02;
+    p.vz += (p.oz - p.z) * 0.02;
+
+    p.vx *= 0.92;
+    p.vy *= 0.92;
+    p.vz *= 0.92;
+
+    p.x += p.vx;
+    p.y += p.vy;
+    p.z += p.vz;
+
+});
+                let sortedParticles = heartParticles.map(p => {
+                    let cosY = Math.cos(angleY);
+                    let sinY = Math.sin(angleY);
+
+                    let xRot = (p.x * cosY - p.z * sinY) * scale;
+                    let zRot = (p.x * sinY + p.z * cosY) * scale;
+                    let yRot = p.y * scale;
+
+                    let perspective = 350 / (350 + zRot);
+
+                    return {
+                        projX: cx + xRot * perspective,
+                        projY: cy + yRot * perspective,
+                        zRot: zRot,
+                        size: Math.max(1.8, (zRot + 60) * 0.05),
+                        alpha: Math.min(1, Math.max(0.35, (zRot + 60) / 100))
+                    };
+                }).sort((a, b) => a.zRot - b.zRot);
+
+                // Vẽ các hạt nối đặc khối
+                const haloSize = 150 + Math.sin(pulse)*20;
+
+ctx.save();
+ctx.globalAlpha = 0.3;
+
+const gradient = ctx.createRadialGradient(
+    cx, cy, 20,
+    cx, cy, haloSize
+);
+
+gradient.addColorStop(0,"rgba(255,80,120,0.6)");
+gradient.addColorStop(1,"rgba(255,0,50,0)");
+
+ctx.fillStyle = gradient;
+
+ctx.beginPath();
+ctx.arc(cx,cy,haloSize,0,Math.PI*2);
+ctx.fill();
+
+ctx.restore();
+                sortedParticles.forEach(p => {
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    const depth =
+    (p.zRot + 70) / 140;
+
+const r = 255;
+const g = Math.floor(20 + depth * 100);
+const b = Math.floor(60 + depth * 120);
+
+ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.shadowBlur = 10; 
+                    ctx.shadowColor = "#ff0044";
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.projX, p.projY, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+
+                ctx.fillStyle = "pink";
+                ctx.font = "bold 32px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Forever In My Heart", cx, cy + 220);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
